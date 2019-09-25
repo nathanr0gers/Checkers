@@ -1,0 +1,162 @@
+package checkers;
+
+public class Location 
+{
+	private boolean playerPiece;
+	private boolean computerPiece;
+	private boolean kingPiece;
+	private boolean deadPlayerPiece;
+	private boolean deadComputerPiece;
+	private boolean selectedPiece;
+	
+	public Location()
+	{
+		playerPiece = false;
+		computerPiece = false;
+		deadComputerPiece = false;
+		deadPlayerPiece = false;
+		selectedPiece = false;
+		
+	}
+	
+	/**
+	 * @return true or false
+	 * if a location has a playerPiece, true is returned
+	 */
+	public boolean hasPlayerPiece()
+	{
+		if(playerPiece)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * @param val
+	 * sets the boolean value of king to be val
+	 */
+	public void setKingPiece(boolean val)
+	{
+		kingPiece = val;
+	}
+	/**
+	 * @param val
+	 * sets the boolean value of selectedPiece to be val
+	 */
+	public void setSelectedPiece(boolean val)
+	{
+		selectedPiece = val;
+	}
+	/**
+	 * @param val
+	 * sets the boolean value of deadPlayerPiece to be val
+	 */
+	public void setDeadPlayerPiece(boolean val)
+	{
+		deadPlayerPiece = val;
+	}
+	/**
+	 * @param val
+	 * sets the boolean value of deadComputerPiece to be val
+	 */
+	public void setDeadComputerPiece(boolean val)
+	{
+		deadComputerPiece = val;
+	}
+	/**
+	 * @return true or false
+	 * if a location has a selectedPiece, true is returned
+	 */
+	public boolean hasSelectedPiece()
+	{
+		if(selectedPiece)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	/**
+	 * @return true or false
+	 * if a location has a deadComputerPiece, true is returned
+	 */
+	public boolean hasDeadComputerPiece()
+	{
+		if(deadComputerPiece)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	/**
+	 * @return true or false
+	 * if a location has a deadPlayerPiece, true is returned
+	 */
+	public boolean hasDeadPlayerPiece()
+	{
+		if(deadPlayerPiece)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	/**
+	 * @return true or false
+	 * if a location has a king piece, true is returned
+	 */
+	public boolean hasKingPiece()
+	{
+		if(kingPiece)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	/**
+	 * @return true or false
+	 * if a location has a computerPiece, true is returned
+	 */
+	public boolean hasComputerPiece()
+	{
+		if(computerPiece)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	/**
+	 * @param val
+	 * sets the boolean value of playerPiece to be val
+	 */
+	public void setPlayerPiece(boolean val)
+	{
+		playerPiece = val;
+	}
+	/**
+	 * @param val
+	 * sets the boolean value of computerPiece to be val
+	 */
+	public void setComputerPiece(boolean val)
+	{
+		computerPiece = val;
+	}
+
+}
