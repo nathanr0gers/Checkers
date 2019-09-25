@@ -1,0 +1,411 @@
+package checkers;
+
+public class Grid
+{
+	private Location[][] grid;
+	public static final int NUM_ROWS = 9;
+  	public static final int NUM_COLS = 9;
+  	
+  	//Grid object is a 2d array with NUM_ROWS rows and NUM_COLS columns
+  	//Each value in the array is instantiated as a location object
+  	public Grid()
+  	{
+  		grid = new Location[NUM_ROWS][NUM_COLS];
+  		for(int i = 0; i < grid.length;i++)
+  		{
+  			for(int j = 0; j < grid[0].length;j++)
+  			{
+  				grid[i][j] = new Location();
+  			}
+  		}
+  	}
+  	
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @return true or false
+  	 * checks to see if a location has a king piece
+  	 */
+  	public boolean hasKingPiece(int row, int col)
+  	{
+  		if(grid[row][col].hasKingPiece())
+  		{
+  			return true;
+  		}
+  		else
+  		{
+  			return false;
+  		}
+  	}
+ 
+  	
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @return true or false
+  	 * checks to see if a location has a deadComputerPiece
+  	 * 
+  	 */
+  	public boolean hasDeadComputerPiece(int row, int col)
+  	{
+  		if(grid[row][col].hasDeadComputerPiece())
+  		{
+  			return true;
+  		}
+  		else
+  		{
+  			return false;
+  		}
+  	}
+  	
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @return true or false
+  	 * checks to see if a location has a deadPlayerPiece
+  	 */
+  	public boolean hasDeadPlayerPiece(int row, int col)
+  	{
+  		if(grid[row][col].hasDeadPlayerPiece())
+  		{
+  			return true;
+  		}
+  		else
+  		{
+  			return false;
+  		}
+  	}
+  	
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @return true or false
+  	 * checks to see if a location has a selectedPiece
+  	 */
+  	public boolean hasSelectedPiece(int row, int col)
+  	{
+  		if(grid[row][col].hasSelectedPiece())
+  		{
+  			return true;
+  		}
+  		else
+  		{
+  			return false;
+  		}
+  	}
+  
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @return true or false
+  	 * checks to see if a location has playerPiece
+  	 */
+  	public boolean hasPlayerPiece(int row, int col)    
+  	{
+  		if(grid[row][col].hasPlayerPiece())
+  		{
+  			return true;
+  		}
+  		else
+  		{
+  			return false;
+  		}
+  	}
+  
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @return true or false
+  	 * checks to see if a location has a computerPiece
+  	 */
+  	public boolean hasComputerPiece(int row, int col)    
+  	{
+  		if(grid[row][col].hasComputerPiece())
+  		{
+  			return true;
+  		}
+  		else
+  		{
+  			return false;
+  		}
+  	}
+  	
+  	/**
+  	 * @return true or false
+  	 * Double for-loop runs through grid and counts how many locations have computerPieces
+  	 * if the count is 0, true is returned.
+  	 */
+  	public boolean redWins()
+  	{
+  		int count = 0;
+  		for(int i = 0; i < 8;i++)
+  		{
+  			for(int j = 0; j < 8; j++)
+  			{
+  				if(hasComputerPiece(i,j))
+  				{
+  					count++;
+  				}
+  			}
+  		}
+	  
+  		if(count == 0)
+  		{
+  			return true;
+  		}
+  		else
+  		{
+  			return false;
+  		}
+  	}
+  
+  	/**
+  	 * @return true or false
+  	 * Double for-loop runs through grid and counts how many locations have playerPieces
+  	 * if the count is 0, true is returned.
+  	 */
+  	public boolean whiteWins()
+  	{
+  		int count = 0;
+  		for(int i = 0; i < 8;i++)
+  		{
+  			for(int j = 0; j < 8; j++)
+  			{
+  				if(hasPlayerPiece(i,j))
+  				{
+  					count++;
+  				}
+  			}
+  		}
+	  
+  		if(count == 0)
+  		{
+  			return true;
+  		}
+  		else
+  		{
+  			return false;
+  		}
+  	}
+  
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @param val
+  	 * sets location's computerPiece at row and col to have the value val
+  	 */
+  	public void setComputerPiece(int row, int col, boolean val)
+  	{
+  		grid[row][col].setComputerPiece(val);
+  	}
+  	
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @param val
+  	 * sets location's deadComputerPiece at row and col to have the value val
+  	 */
+  	public void setDeadComputerPiece(int row, int col, boolean val)
+  	{
+  		grid[row][col].setDeadComputerPiece(val);
+  	}
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @param val
+  	 * sets location's deadPlayerPiece at row and col to have the value val
+  	 */
+  	public void setDeadPlayerPiece(int row, int col, boolean val)
+  	{
+  		grid[row][col].setDeadPlayerPiece(val);
+  	}
+  	
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @param val
+  	 * sets location's selectedPiece at row and col to have the value val
+  	 */
+  	public void setSelectedPiece(int row, int col, boolean val)
+  	{
+  		grid[row][col].setSelectedPiece(val);
+  	}
+  
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @param val
+  	 * sets location's playerPiece at row and col to have the value val
+  	 */
+  	public void setPlayerPiece(int row, int col, boolean val)
+  	{
+  		grid[row][col].setPlayerPiece(val);
+  	}
+  
+  	/**
+  	 * @param row
+  	 * @param col
+  	 * @param val
+  	 * sets location's king piece at row and col to have the value val
+  	 */
+  	public void setKingPiece(int row, int col, boolean val)
+  	{
+  		grid[row][col].setKingPiece(val);
+  	}
+  
+  
+	/**
+	 * @param rOld
+	 * @param cOld
+	 * @param rNew
+	 * @param cNew
+	 * removes the playerPiece from the old location and sets one at the new location
+	 * checks to see if the piece is becoming a king or was a king, and sets locations appropriately
+	 */
+	public void movePlayerPiece(int rOld, int cOld, int rNew, int cNew)
+	{
+		setPlayerPiece(rOld, cOld, false);
+		setPlayerPiece(rNew, cNew, true);
+		if(rNew == 7 || hasKingPiece(rOld,cOld))
+		{
+			setKingPiece(rNew, cNew, true);
+			setKingPiece(rOld,cOld,false);
+		}
+	}
+	
+	/**
+	 * @param rOld
+	 * @param cOld
+	 * @param rNew
+	 * @param cNew
+	 * removes the computerPiece from the old location and sets one at the new location
+	 * checks to see if the piece is becoming a king or was a king, and sets locations appropriately
+	 */
+	public void moveComputerPiece(int rOld, int cOld, int rNew, int cNew)
+	{
+		setComputerPiece(rOld, cOld, false);
+		setComputerPiece(rNew, cNew, true);
+		if(rNew == 0|| hasKingPiece(rOld,cOld))
+		{
+			setKingPiece(rNew, cNew, true);
+			setKingPiece(rOld,cOld, false);
+		}
+	}
+	
+	//double for-loop goes through and sets the appropriate locations to have player piece and computer pieces
+	public void addPieces()
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			for(int j = 0; j < 8; j++)
+			{
+				if(i % 2 == 0)
+				{
+					if(j % 2 == 0)
+					{
+						setPlayerPiece(i,j,true);
+					}
+				}
+				else
+				{
+					if(j % 2 != 0)
+					{
+						setPlayerPiece(i,j,true);
+					}
+				}
+			}
+		}
+		
+		for(int i = 5; i < 8; i++)
+		{
+			for(int j = 0; j < 8; j++)
+			{
+				if(i % 2 == 0)
+				{
+					if(j % 2 == 0)
+					{
+						setComputerPiece(i,j,true);
+					}
+				}
+				else
+				{
+					if(j % 2 != 0)
+					{
+						setComputerPiece(i,j,true);
+					}
+				}
+			}
+		}
+	}
+	//double for-loop which goes through and removes all the deadPieces
+	public void removeDeadPieces()
+	{
+		for(int i = 0; i < 8;i++)
+  		{
+  			for(int j = 0; j < 8; j++)
+  			{
+  				if(hasDeadComputerPiece(i,j))
+  				{
+  					grid[i][j].setDeadComputerPiece(false);
+  				}
+  				if(hasDeadPlayerPiece(i,j))
+  				{
+  					grid[i][j].setDeadPlayerPiece(false);
+  				}
+  			}
+  		}
+	}
+	
+	//double for-loop goes through the grid array and removes all the player pieces, thus the player forfeits
+	public void playerForfeitGame()
+	{
+		for(int i = 0; i < 8;i++)
+  		{
+  			for(int j = 0; j < 8; j++)
+  			{
+  				if(hasPlayerPiece(i,j))
+  				{
+  					grid[i][j].setPlayerPiece(false);
+  				}
+  			}
+  		}
+		
+	}
+	//double for-loop goes through the grid array and removes all the computer pieces, thus the player forfeits
+	public void computerForfeitGame()
+	{
+		for(int i = 0; i < 8;i++)
+  		{
+  			for(int j = 0; j < 8; j++)
+  			{
+  				if(hasComputerPiece(i,j))
+  				{
+  					grid[i][j].setComputerPiece(false);
+  				}
+  			}
+  		}
+		
+	}
+	
+	
+	//double for-loop traverses the grid array and removes the selected boolean value from all locations
+	public void deSelectPieces()
+	{
+		for(int i = 0; i < 8;i++)
+  		{
+  			for(int j = 0; j < 8; j++)
+  			{
+  				if(hasSelectedPiece(i,j))
+  				{
+  					grid[i][j].setSelectedPiece(false);
+  				}
+  			}
+  		}
+	}
+}
+
+
+
+
+
+
