@@ -1,0 +1,979 @@
+package checkers;
+
+import java.awt.Color;
+import java.util.Scanner;
+import java.awt.Graphics;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.swing.JFrame;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.WindowEvent;
+import java.util.*;
+import java.awt.Stroke;
+import java.awt.BasicStroke;
+import javax.swing.JPanel;
+import java.awt.Toolkit;
+import java.awt.Dimension;
+import java.awt.geom.Line2D;
+import java.io.File;
+
+public class Main extends JPanel 
+{
+	private static final long serialVersionUID = 1L;
+	private Grid grid;
+	private Scanner myObj;
+	private boolean start;
+	private static boolean end;
+	private static boolean jumped;
+	musicStuff music;
+
+	public Main() 
+	{
+		music = new musicStuff();
+		start = true;
+		jumped = false;
+		grid = new Grid();
+		end = false;
+	}
+	
+	/**
+	 * @param g
+	 */
+	//paint component paints the JPanel
+	public void paintComponent(Graphics g)
+	{
+		super.paintComponent(g);
+		
+		//Initialize graphics 2D, turning antialiasing on for smoother checker pieces
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+	
+	    //If start = true, the starting screen is painted
+	    if(start)
+	    {
+	    	g.setColor(new java.awt.Color(204, 255,255));
+			g.fillRect(0, 0, 800, 800 + 29);
+			g.setColor(Color.black);
+			g.drawString("CHECKERS", 363, 370);
+			g.drawString("By Nathan, Riley and Lucas", 323, 530);
+			g.setColor(new java.awt.Color(255, 0,0));
+			g.fillOval(348 + 5, 375 + 7 + 25, 90, 85);
+			g.setColor(new java.awt.Color(255, 0, 0));
+			g.fillOval(348 + 5, 375 + 7 + 25, 90, 78);
+			g.setColor(Color.black);
+			g.drawOval(348 + 5, 375 + 7 + 25, 90, 85);
+			g.drawOval(348 + 20, 375 + 20 + 25, 60, 52);
+			g.setColor(Color.black);
+			g.drawOval(348 + 5, 375 + 7 + 25, 90, 78);	
+	    }
+	    
+	    //if end = true, the ending screen is printed
+	    else if(end)
+	    {
+	    	g.setColor(new java.awt.Color(204, 255,255));
+			g.fillRect(0, 0, 800, 800 + 29);
+			g.setColor(Color.black);
+			g.drawString("THANKS FOR PLAYING", 349, 375);
+			g.setColor(new java.awt.Color(255, 0,0));
+			g.fillOval(363 + 5, 375 + 7 + 25, 90, 85);
+			g.setColor(new java.awt.Color(255, 0, 0));
+			g.fillOval(363 + 5, 375 + 7 + 25, 90, 78);
+			g.setColor(Color.black);
+			g.drawOval(363 + 5, 375 + 7 + 25, 90, 85);
+			g.drawOval(363 + 20, 375 + 20 + 25, 60, 52);
+			g.setColor(Color.black);
+			g.drawOval(363 + 5, 375 + 7 + 25, 90, 78);	
+	    }
+	    
+	    //if start != true and end != true:
+	    //the board and the coordinates are painted
+	    //The pieces are painted in
+	    else
+	    {
+	    	//double for-loop which paints a board of alternating yellow and green squares
+	    	//also adds in coordinates at the bottom of each square
+	    	for(int i = 0; i < 800; i+=100)
+			{
+				for(int j = 0; j <= 800; j+=100)
+				{
+					if(i % 200 == 0)
+					{
+						if(j % 200 == 0)
+						{
+							g.setColor(new java.awt.Color(46,139,87));
+							g.fillRect(i, j, 100, 100);
+							g.drawString("[" + String.valueOf(j/100 - 1) +", " +  String.valueOf(i/100) + "]", i + 2, j - 3);
+							g.setColor(Color.black);
+							g.drawRect(i, j, 100, 100);
+						}
+						else
+						{
+							g.setColor(new java.awt.Color(255,255,224));
+							g.fillRect(i, j, 100, 100);
+							g.drawString("[" + String.valueOf(j/100 - 1) +", " +  String.valueOf(i/100) + "]", i + 2, j - 3);
+							g.setColor(Color.black);
+							g.drawRect(i, j, 100, 100);
+						}
+					}
+					else
+					{
+						if(j % 200 == 0)
+						{
+							g.setColor(new java.awt.Color(255,255,224));
+							g.fillRect(i, j, 100, 100);
+							g.drawString("[" + String.valueOf(j/100 - 1) +", " +  String.valueOf(i/100) + "]", i + 2, j - 3);
+							g.setColor(Color.black);
+							g.drawRect(i, j, 100, 100);
+						}
+						else
+						{
+							g.setColor(new java.awt.Color(46,139,87));
+							g.fillRect(i, j, 100, 100);
+							g.drawString("[" + String.valueOf(j/100 - 1) +", " +  String.valueOf(i/100) + "]", i + 2, j - 3);
+							g.setColor(Color.black);
+							g.drawRect(i, j, 100, 100);
+						}
+					}
+				}
+			}
+	    	//double for-loop which is what paints the checkers, the selected squares, and the checkers which have been removed one turn earlier
+			for(int i = 0; i < 8;i++)
+			{
+				for(int j = 0; j < 8;j++)
+				{	
+					//if a location has a player piece, a red checker is painted in that location
+					if(grid.hasPlayerPiece(j,i)) 
+					{
+						g.setColor(new java.awt.Color(255, 0,0));
+						g.fillOval(i * 100 + 5, j * 100 + 7, 90, 85);
+						g.setColor(new java.awt.Color(255, 0, 0));
+						g.fillOval(i * 100 + 5, j * 100 + 7, 90, 78);
+						
+						g.setColor(Color.black);
+						g.drawOval(i * 100 + 5, j * 100 + 7, 90, 85);
+						
+						g.drawOval(i * 100 + 20, j * 100 + 20, 60, 52);
+						
+						//if a location which has a player piece also contains a king piece, a red and yellow checker is painted in that location
+						if(grid.hasKingPiece(j,i))
+						{
+							g.setColor(new java.awt.Color(255,215,0));
+							g.fillOval(i * 100 + 5, j * 100 + 7, 90, 85);
+							g.setColor(Color.red);
+							g.fillOval(i * 100 + 20, j * 100 + 20, 60, 52);
+							g.setColor(Color.black);
+							g.drawOval(i * 100 + 20, j * 100 + 20, 60, 52);
+						}
+						g.setColor(Color.black);
+						g.drawOval(i * 100 + 5, j * 100 + 7, 90, 78);	
+					}
+					
+					//if a location has a computer piece, a white checker is painted in that location
+					if(grid.hasComputerPiece(j,i)) 
+					{
+						g.setColor(new java.awt.Color(169,169,169));
+						g.fillOval(i * 100 + 5, j * 100 + 7, 90, 78);
+						g.setColor(Color.white);
+						g.fillOval(i * 100 + 5, j * 100 + 7, 90, 85);
+						g.setColor(Color.black);
+						g.drawOval(i * 100 + 20, j * 100 + 20, 60, 52);
+						//if a location which has a computer piece also contains a king piece, a white and yellow checker is painted in that location
+						if(grid.hasKingPiece(j,i))
+						{
+							g.setColor(new java.awt.Color(255,215,0));
+							g.fillOval(i * 100 + 5, j * 100 + 7, 90, 85);
+							g.setColor(Color.white);
+							g.fillOval(i * 100 + 20, j * 100 + 20, 60, 52);
+							g.setColor(Color.black);
+							g.drawOval(i * 100 + 20, j * 100 + 20, 60, 52);
+						}
+						g.setColor(Color.black);
+						
+						g.drawOval(i * 100 + 5, j * 100 + 7, 90, 85);
+						g.drawOval(i * 100 + 5, j * 100 + 7, 90, 78);
+					}
+					//if a location has a selected piece, a yellow border is painted around the square which correlates to the location
+					if(grid.hasSelectedPiece(j,i))
+					{
+						Stroke oldStroke = g2d.getStroke();
+						g2d.setStroke(new BasicStroke(6));
+						g2d.setColor(Color.yellow);
+						g2d.drawRect(i * 100, j * 100, 100, 100);
+						g2d.setStroke(oldStroke);
+					}
+					//if a location has a dead computer piece, a white "x" is painted in the square which correlates to the location
+					if(grid.hasDeadComputerPiece(j,i))
+					{
+						Stroke oldStroke = g2d.getStroke();
+						g2d.setStroke(new BasicStroke(6));
+						g2d.setColor(Color.white);
+						g2d.draw(new Line2D.Float(i * 100 + 20 , j * 100 + 20,i * 100 + 100 - 20, j * 100 + 100 - 20));
+						g2d.draw(new Line2D.Float(i * 100 + 100 - 20 , j * 100 + 20,i * 100 + 20, j * 100 + 100 - 20));
+						g2d.setStroke(oldStroke);
+					}
+					//if a location has a dead player piece, a red "x" is painted in the square which correlates to the location
+					if(grid.hasDeadPlayerPiece(j,i))
+					{
+						Stroke oldStroke = g2d.getStroke();
+						g2d.setStroke(new BasicStroke(6));
+						g2d.setColor(Color.red);
+						g2d.draw(new Line2D.Float(i * 100 + 20 , j * 100 + 20,i * 100 + 100 - 20, j * 100 + 100 - 20));
+						g2d.draw(new Line2D.Float(i * 100 + 100 - 20 , j * 100 + 20,i * 100 + 20, j * 100 + 100 - 20));
+						g2d.setStroke(oldStroke);
+					}
+				}
+			}
+	    }
+	}
+	
+	/**
+	 * @throws InterruptedException
+	 */
+	//This deals with the music in the starting screen, let's you know if you don't have a music file
+	public void startingScreen() throws InterruptedException
+	{
+		try
+		{
+			File musicPath = new File("piano.wav");
+			
+			if(musicPath.exists())
+			{
+					AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
+					Clip clip = AudioSystem.getClip();
+					clip.open(audioInput);
+					clip.start();
+					clip.loop(clip.LOOP_CONTINUOUSLY);
+					Scanner s = new Scanner(System.in);
+					
+					System.out.println("Press Enter to start the game");
+				    s.nextLine();
+					clip.stop();
+			}
+			else
+			{
+				System.out.println("cant find file");
+			}
+			
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	    start = false;
+		this.repaint();
+	}
+	
+	/**
+	 * @param frame
+	 * @throws InterruptedException
+	 */
+	//deals with the music in ending screen, again lets you know if music file is missing
+	public void endingScreen(JFrame frame) throws InterruptedException
+	{
+		try
+		{
+			File musicPath = new File("piano.wav");
+			
+			if(musicPath.exists())
+			{
+					AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
+					Clip clip = AudioSystem.getClip();
+					clip.open(audioInput);
+					clip.start();
+					clip.loop(clip.LOOP_CONTINUOUSLY);
+					Scanner s = new Scanner(System.in);
+					
+					System.out.println("Press Enter to close the game");
+				    s.nextLine();
+					clip.stop();
+					frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+		    }
+			else
+			{
+				System.out.println("cant find file");
+			}
+			
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+	
+
+	//Deals with all the movement functionality of the pieces, this is specifically for white pieces
+	public void opponentTurn()
+	{
+		int r;
+		int c;
+		while(true)
+		{
+			
+			//de-selects previously selected pieces
+			//repaints the JPanel
+			//prints that it is the white players turn
+			
+			System.out.println();
+			grid.deSelectPieces();
+			repaint();
+			System.out.println("White Player Turn:");
+			System.out.println();
+			
+			//scanner which takes in user input for the row and column
+			//exception catches if something other than integer is inputed, in which case it re-prompts
+			myObj = new Scanner(System.in);
+			
+			try 
+			{
+				System.out.println("Enter row: ");
+				r = myObj.nextInt();
+		    } 
+	        catch (InputMismatchException e) 
+		    {
+	        	System.out.println("Invalid. Please enter an integer value");
+	        	continue;
+		    }
+			
+			try 
+			{
+				System.out.println("Enter col: ");
+				c = myObj.nextInt();
+		    } 
+	        catch (InputMismatchException e) 
+		    {
+	        	System.out.println("Invalid. Please enter an integer value");
+	        	continue;
+		    }
+		    
+		    //checks to make sure the user inputed row and column are within bounds
+		    if(r > 7 || r < 0 || c < 0 || c > 7)
+		    {
+		    	System.out.println("Choose a piece within bounds");
+		    	continue;
+		    }
+		    
+		    //makes sure that the location has computer piece
+		    //if not, the user most re-enter legitimate values
+		    if(!grid.hasComputerPiece(r, c))
+		    {
+		    	System.out.println("You do not have a piece at this location");
+		    	continue;
+		    }
+		    //plays the selection noise because the user has properly selected a valid piece
+		    music.playMusic("select.wav");
+		    grid.setSelectedPiece(r, c, true);
+		    
+		    //repaints the JPanel so that the location is selected
+		    repaint();		    
+		    
+			//checks to see if the selected location has a king piece
+		    //if it does, they are given the option to move in four directions
+		    //else, they can only move in two directions
+		    if(grid.hasKingPiece(r, c))
+		    {
+		    	System.out.println("Would you like to go upleft, upright, downleft, downright, switch pieces or forfeit? (ul, ur, dl, dr, s, ff )");
+		    }
+		    else
+		    {
+		    	System.out.println("Would you like to go upleft, upright, switch pieces or forfeit? (ul, ur, s, ff)");
+		    }
+		    
+		    String turn = myObj.next();
+		    //de-selects the location
+		    grid.setSelectedPiece(r, c, false);
+		    
+		    //removes dead piece from the previous round
+			grid.removeDeadPieces();
+		    
+			if(turn.equals("ul"))
+			   {
+			    //Check if piece is going off the board
+			    if(r - 1 < 0 || c - 1 < 0)
+			    {
+			    	System.out.println("Invalid move");
+			    	continue;
+			    }
+			    	
+			    //Make sure piece doesn't go on top of another piece of same team
+			    else if(grid.hasComputerPiece(r - 1, c - 1))
+			    {
+			    	System.out.println("Invalid move");
+			    	continue;
+			    }
+			    	
+			    //Check to see if opposing player piece is in range
+			    else if(grid.hasPlayerPiece(r - 1, c - 1))
+			    {
+			    	//Check to see if jumping over piece will make piece go off the board
+			    	if(r - 2 < 0 || c - 2 < 0)
+			    	{
+			    		System.out.println("Invalid move");
+			    		continue;
+			    	}
+			    		
+			    	//Check to see if there is space behind piece for a valid jump
+			    	else if (grid.hasPlayerPiece(r - 2, c - 2) || grid.hasComputerPiece(r - 2, c - 2))
+			    	{
+			    		System.out.println("Invalid move");
+			    		continue;
+			    	}
+			    		
+			    	//Jumping the opposing players piece
+			    	else
+			    	{
+				    	moveComputer(r, c, r - 2, c - 2);
+				    	grid.setPlayerPiece(r - 1, c - 1, false);
+				    	if(grid.hasKingPiece(r-1,c-1))
+				    	{
+				    		grid.setKingPiece(r - 1, c - 1, false);
+				    	}
+				    	grid.setDeadPlayerPiece(r - 1, c - 1, true);
+				    	jumped = true;
+				    	break;
+			    	}
+			    }
+			    	
+			    //Move checker piece normally
+			    else
+			    {
+			    	moveComputer(r, c, r - 1, c - 1);
+			    	break;
+			   	}
+		    }
+			//all of the three other moves are coded the same way as the previous one, so comments are left out
+			else if(turn.equals("ur"))
+		    {
+		    	if(r - 1 < 0 || c + 1 > 7)
+		    	{
+		    		System.out.println("Invalid move");
+		    		continue;
+		    	}
+		    	else if(grid.hasComputerPiece(r - 1,c + 1))
+		    	{
+			   		System.out.println("Invalid move");
+			   		continue;
+			   	}
+			   	else if(grid.hasPlayerPiece(r - 1,c + 1))
+			   	{
+			   		if(r - 2 < 0 || c + 2 > 7)
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else if (grid.hasPlayerPiece(r - 2, c + 2) || grid.hasComputerPiece(r - 2, c + 2))
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else
+			   		{
+			    		moveComputer(r, c, r - 2, c + 2);
+			    		grid.setPlayerPiece(r - 1,c + 1,false);
+			    		if(grid.hasKingPiece(r-1,c+1))
+			    		{
+			    			grid.setKingPiece(r - 1, c + 1, false);
+			    		}
+			    		grid.setDeadPlayerPiece(r - 1,c + 1,true);
+			    		jumped = true;
+			    		break;
+		    	    }
+		    	}
+		    	else
+		    	{
+		    		moveComputer(r, c, r - 1, c + 1);
+			   		break;
+		    	}
+		    }
+			else if(turn.equals("dl") && grid.hasKingPiece(r, c))
+		    {
+		    	if(r + 1 > 7 || c - 1 < 0)
+		    	{
+		    		System.out.println("Invalid move");
+		    		continue;
+		    	}
+		    	else if(grid.hasComputerPiece(r + 1, c - 1))
+		    	{
+		    		System.out.println("Invalid move");
+		    		continue;
+		    	}
+			   	else if(grid.hasPlayerPiece(r + 1, c - 1))
+			   	{
+			   		if(r + 2 > 7 || c - 2 < 0)
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else if (grid.hasPlayerPiece(r + 2, c - 2) || grid.hasComputerPiece(r + 2, c - 2))
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+		    		else
+		    		{
+			    		moveComputer(r, c, r + 2, c - 2);
+			    		grid.setPlayerPiece(r + 1, c - 1, false);
+			    		if(grid.hasKingPiece(r + 1, c - 1))
+			    		{
+			    			grid.setKingPiece(r + 1, c - 1, false);
+			    		}
+			    		grid.setDeadPlayerPiece(r + 1, c - 1, true);
+			    		jumped = true;
+			    		break;
+		    	    }
+		    	}
+			   	else
+			   	{
+			   		moveComputer(r, c, r + 1, c  - 1);
+			   		break;
+			   	}
+		    }
+			else if(turn.equals("dr") && grid.hasKingPiece(r, c))
+			   {
+			   	if(r + 1 > 7 || c + 1 > 7)
+			   	{
+			   		System.out.println("Invalid move");
+			   		continue;
+			   	}
+			   	else if(grid.hasComputerPiece(r  + 1, c + 1))
+			   	{
+			   		System.out.println("Invalid move");
+			   		continue;
+			   	}
+			   	else if(grid.hasPlayerPiece(r + 1, c + 1))
+			   	{
+			   		if(r + 2 > 7 || c + 2 > 7)
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else if (grid.hasPlayerPiece(r + 2, c + 2) || grid.hasComputerPiece(r + 2, c + 2))
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else
+			   		{
+			    		moveComputer(r, c, r + 2, c + 2);
+				   		grid.setPlayerPiece(r + 1, c + 1,false);
+				   		if(grid.hasKingPiece(r + 1, c + 1))
+				   		{
+				   			grid.setKingPiece(r + 1, c + 1, false);
+				   		}
+				   		grid.setDeadPlayerPiece(r + 1, c + 1,true);
+				   		jumped = true;
+				   		break;
+			   	    }
+			   	}
+		    	else
+		    	{
+		    		moveComputer(r, c, r + 1, c + 1);
+		    		break;
+		    	}
+		    }
+			//if the user enters "s" they are brought back up to the top of the while loop
+			else if(turn.equals("s"))
+			{
+				continue;
+			}
+			//if the user enters "ff" they forfeit the game and the other player wins
+			else if(turn.equals("ff"))
+			{
+				grid.computerForfeitGame();
+				break;
+			}
+			//tells the user to enter a valid move and brings them to the top of the while loop
+			System.out.println("Ivalid move");
+		}
+	}
+
+	
+	//All comments in opponentTurn() are valid for playerTurn() 
+	public void playerTurn()
+	{
+		int r;
+		int c;
+		while(true)
+		{
+			System.out.println();
+			grid.deSelectPieces();
+			repaint();
+			System.out.println("Red Player Turn:");
+			System.out.println();
+			
+			myObj = new Scanner(System.in);
+			
+			try 
+			{
+				System.out.println("Enter row: ");
+				r = myObj.nextInt();
+		    } 
+	        catch (InputMismatchException e) 
+		    {
+	        	System.out.println("Invalid. Please enter an integer value");
+	        	continue;
+		    }
+			
+			try 
+			{
+				System.out.println("Enter col: ");
+				c = myObj.nextInt();
+		    } 
+	        catch (InputMismatchException e) 
+		    {
+	        	System.out.println("Invalid. Please enter an integer value");
+	        	continue;
+		    }
+		    
+		    
+		    if(r > 7 || r < 0 || c < 0 || c > 7)
+		    {
+		    	System.out.println("Choose a piece within bounds");
+		    	continue;
+		    }
+		    
+		    if(!grid.hasPlayerPiece(r, c))
+		    {
+		    	System.out.println("You do not have a piece at this location");
+		    	continue;
+		    }
+		    
+		    //selects piece and repaints grid
+		    music.playMusic("select.wav");
+		    grid.setSelectedPiece(r, c, true);
+		    repaint();
+		   
+		    if(grid.hasKingPiece(r, c))
+		    {
+		    	System.out.println("Would you like to go upleft, upright, downleft, downright, switch pieces or forfeit? (ul, ur, dl, dr, s, ff)");
+		    }
+		    else
+		    {
+		    	System.out.println("Would you like to go downleft, downright, switch pieces or forfeit? (dl, dr, s, ff)");
+		    }
+		    
+		    String turn = myObj.next();
+		    
+		
+		    grid.setSelectedPiece(r, c, false);
+			grid.removeDeadPieces();
+		  	
+			
+			if(turn.equals("ul") && grid.hasKingPiece(r,c))
+			{
+				//Check if piece is going off the board
+			    if(r - 1 < 0 || c - 1 < 0)
+			   	{
+			   		System.out.println("Invalid move");
+			   		continue;
+			   	}
+			    	
+			   	//Make sure piece doesn't go on top of another piece of same team
+		    	else if(grid.hasPlayerPiece(r - 1, c - 1))
+		    	{
+			   		System.out.println("Invalid move");
+			   		continue;
+			   	}
+			    	
+			   	//Check to see if opposing player piece is in range
+			   	else if(grid.hasComputerPiece(r - 1, c - 1))
+			   	{
+			   		//Check to see if jumping over piece will make piece go off the board
+			   		if(r - 2 < 0 || c - 2 < 0)
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			    		
+			   		//Check to see if there is space behind piece for a valid jump
+			   		else if (grid.hasComputerPiece(r - 2, c - 2) || grid.hasPlayerPiece(r - 2, c - 2))
+			   		{
+			    		System.out.println("Invalid move");
+			    		continue;
+			   		}
+			    		
+			   		//Jumping the opposing players piece
+			   		else
+			   		{
+			    		movePlayer(r, c, r - 2, c - 2);
+			    		grid.setComputerPiece(r - 1, c - 1, false);
+			    		if(grid.hasKingPiece(r - 1, c - 1))
+			    		{
+			    			grid.setKingPiece(r - 1, c - 1, false);
+				   		}
+				   		grid.setDeadComputerPiece(r - 1, c - 1, true);
+				   		jumped = true;
+				   		break;
+			   		}
+			   	}
+			    	
+			   	//Move checker piece normally
+			   	else
+			   	{
+			   		movePlayer(r, c, r - 1, c - 1);
+			   		break;
+			   	}
+		    }
+			else if(turn.equals("ur") && grid.hasKingPiece(r, c))
+		    {
+		    	if(r - 1 < 0 || c + 1 > 7)
+		    	{
+		    		System.out.println("Invalid move");
+		    		continue;
+		    	}
+			   	else if(grid.hasPlayerPiece(r - 1,c + 1))
+			   	{
+			   		System.out.println("Invalid move");
+			   		continue;
+		    	}
+		    	else if(grid.hasComputerPiece(r - 1,c + 1))
+			   	{
+			   		if(r - 2 < 0 || c + 2 > 7)
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else if (grid.hasComputerPiece(r - 2, c + 2) || grid.hasPlayerPiece(r - 2, c + 2))
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else
+			   		{
+			    		movePlayer(r, c, r - 2, c + 2);
+			    		grid.setComputerPiece(r - 1,c + 1,false);
+			    		if(grid.hasKingPiece(r - 1, c + 1))
+			    		{
+				   			grid.setKingPiece(r - 1, c + 1, false);
+				   		}
+				   		grid.setDeadComputerPiece(r - 1,c + 1,true);
+				   		jumped = true;
+			    		break;
+			   	    }
+			   	}
+			   	else
+			   	{
+			   		movePlayer(r, c, r - 1, c + 1);
+			   		break;
+		    	}
+			    }
+			else if(turn.equals("dl"))
+		    {
+		    	if(r + 1 > 7 || c - 1 < 0)
+			   	{
+			   		System.out.println("Invalid move");
+			   		continue;
+			   	}
+			   	else if(grid.hasPlayerPiece(r + 1, c - 1))
+			   	{
+			   		System.out.println("Invalid move");
+			   		continue;
+			   	}
+			   	else if(grid.hasComputerPiece(r + 1, c - 1))
+			   	{
+			   		if(r + 2 > 7 || c - 2 < 0)
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else if (grid.hasComputerPiece(r + 2, c - 2) || grid.hasPlayerPiece(r + 2, c - 2))
+			   		{
+			   			System.out.println("Invalid move");
+			   			continue;
+			   		}
+			   		else
+			   		{
+				   		movePlayer(r, c, r + 2, c - 2);
+				   		grid.setComputerPiece(r + 1, c - 1, false);
+				   		if(grid.hasKingPiece(r + 1, c - 1))
+				   		{
+				   			grid.setKingPiece(r + 1, c - 1, false);
+				   		}
+				   		grid.setDeadComputerPiece(r + 1, c - 1, true);
+				   		jumped = true;
+				   		break;
+			   	    }
+			   	}
+			   	else
+			   	{
+			   		movePlayer(r, c, r + 1, c  - 1);
+			   		break;
+			   	}
+		    }
+			else if(turn.equals("dr"))
+			{
+		    	if(r + 1 > 7 || c + 1 > 7)
+		    	{
+		    		System.out.println("Invalid move");
+		    		continue;
+		    	}
+		    	else if(grid.hasPlayerPiece(r  + 1, c + 1))
+		    	{
+		    		System.out.println("Invalid move");
+		    		continue;
+		    	}
+		    	else if(grid.hasComputerPiece(r + 1, c + 1))
+		    	{
+		    		if(r + 2 > 7 || c + 2 > 7)
+		    		{
+		    			System.out.println("Invalid move");
+		    			continue;
+		    		}
+		    		else if (grid.hasComputerPiece(r + 2, c + 2) || grid.hasPlayerPiece(r + 2, c + 2))
+		    		{
+		    			System.out.println("Invalid move");
+			   			continue;
+		    		}
+		    		else
+			   		{
+			    		movePlayer(r, c, r + 2, c + 2);
+			    		grid.setComputerPiece(r + 1, c + 1,false);
+			    		if(grid.hasKingPiece(r + 1, c + 1))
+			    		{
+			    			grid.setKingPiece(r + 1, c + 1, false);
+			    		}
+			    		grid.setDeadComputerPiece(r + 1, c + 1,true);
+			    		jumped = true;
+			    		break;
+			   	    }
+		    	}
+			   	else
+			   	{
+			   		movePlayer(r, c, r + 1, c + 1);
+			   		break;
+			   	}
+		    }
+			else if(turn.equals("s"))
+			{
+				continue;
+			}
+			else if(turn.equals("ff"))
+			{
+				grid.playerForfeitGame();
+				break;
+			}
+			
+		    System.out.println("Invalid move");
+		}
+	}
+	
+	//accesses the grid addPieces method
+	public void addPieces()
+	{
+	    grid.addPieces();
+	}
+
+	/**
+	 * @param xOld
+	 * @param yOld
+	 * @param xNew
+	 * @param yNew
+	 */
+	//accesses the grid movePlayer method from the grid class
+	public void movePlayer(int xOld, int yOld, int xNew, int yNew)
+	{
+	    grid.movePlayerPiece(xOld, yOld, xNew, yNew);
+	}
+	
+	/**
+	 * @param xOld
+	 * @param yOld
+	 * @param xNew
+	 * @param yNew
+	 */
+	//accesses the moveComputer method from the grid class
+	public void moveComputer(int xOld, int yOld, int xNew, int yNew)
+	{
+	    grid.moveComputerPiece(xOld, yOld, xNew, yNew);
+	}
+	
+	//run method
+	/**
+	 * @param args
+	 * @throws InterruptedException
+	 */
+	public static void main(String[] args) throws InterruptedException
+    {
+		//displays the JPanel at the start setting up all the grid and pieces
+		Main m = new Main();
+		JFrame jf = new JFrame();
+		jf.setResizable(false);
+		jf.setSize(813,836);
+		jf.setVisible(true);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		jf.setLocation(dim.width/2-jf.getSize().width/2, dim.height/2-jf.getSize().height/2);
+		jf.add(m);
+		m.startingScreen();
+		m.addPieces();
+		
+		//adding music sounds to jumping and piece movement
+		musicStuff musicObject = new musicStuff();
+		String jump = "placed.wav";
+		String setup = "setup.wav";
+		String killed = "killed.wav";
+		musicObject.playMusic(setup);
+		
+		//main while loop for the game
+		while(true)
+		{
+			//player is given their turn
+	        m.playerTurn();
+	        m.repaint();
+	        //if a piece is jumped, the killed sound effect is played
+	        if(jumped)
+	        {
+	        	 musicObject.playMusic(killed);
+	        }
+	        //The normal placed noise is played
+	        musicObject.playMusic(jump);
+
+	        jumped = false;
+	        //checks to see if anyone one the game
+	        if(m.grid.redWins())
+	        {
+	        	System.out.println("Red Wins!");
+	        	break;
+	        }
+	        if(m.grid.whiteWins())
+	        {
+	        	System.out.println("White Wins!");
+	        	break;
+	        }
+	        
+	        //opponent is given their turn
+	        m.opponentTurn();
+	        m.repaint();
+	        //if a piece is jumped, the killed sound effect is played
+	        if(jumped)
+	        {
+	        	 musicObject.playMusic(killed);
+	        }
+	       //The normal placed noise in played
+	        musicObject.playMusic(jump);
+	        	 
+	        jumped = false;
+	        //checks to see if anyone is out of pieces
+	        if(m.grid.whiteWins())
+	        {
+	        	System.out.println("White Wins!");
+	        	break;
+	        }
+	        if(m.grid.redWins())
+	        {
+	        	System.out.println("Red Wins!");
+	        	break;
+	        }
+		}
+		
+		//sets end to true, so that m.repaint and m.endingscreen will actually work
+		end = true;
+		m.repaint();
+		m.endingScreen(jf);
+    }
+}
+
+
+
+
